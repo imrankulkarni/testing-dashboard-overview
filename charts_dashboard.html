@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Advanced Testing Charts</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <!-- html2canvas for full-page PNG export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNa5m3zY7v8R7n6uQb3Ckq5i5wq4a6DjF6J5Z+JqgkZr3y6Q0Qq2q6J3R1kF1a6sYkNw5Q9f0OeFv5f8l6y2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        /* Custom Variables and Base Styles */
+        :root {
+            --color-primary-base: #4f46e5; /* Indigo 600 */
+            --color-primary-dark: #3730a3; /* Indigo 800 */
+            --color-success: #10b981; /* Green 500 */
+            --color-failure: #ef4444; /* Red 500 */
+            --color-background: #f1f5f9; /* Slate 100 */
+            --color-text-dark: #1e293b; /* Slate 800 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text-dark);
+        }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Chart Card Style - Polished Look */
+        .card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Header Styling */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            margin-bottom: 2rem;
+            border-bottom: 3px solid var(--color-primary-base);
+        }
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--color-primary-dark);
+            display: flex;
+            align-items: center;
+        }
+
+        /* KPI and Pie Chart Grid - CRITICAL FIX */
+        .kpi-summary-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        @media (min-width: 1024px) {
+            .kpi-summary-row {
+                grid-template-columns: 1fr 2fr;
+                align-items: stretch;
+            }
+            .mini-kpi-stack {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+            .mini-kpi-stack .kpi-card {
+                flex-grow: 1;
+            }
+        }
+
+        /* Mini KPI Card Refinement */
+        .mini-kpi-stack .kpi-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.25rem;
+        }
+        .mini-kpi-stack .kpi-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        .mini-kpi-stack .kpi-value {
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 5;
+            margin-top: 0.5rem;
+        }
+        .kpi-value.primary { color: var(--color-primary-base); }
+        .kpi-value.success { color: var(--color-success); }
+
+        /* Consolidated Pie Chart Card */
+        .large-pie-chart-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .large-pie-chart-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-dark);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .chart-wrapper.suite-pie-chart-wrapper {
+            width: 200%;
+            max-width: 320px;
+            aspect-ratio: 1 / 1;
+            margin-top: -1rem;
+        }
+
+        /* Chart Section Headings */
+        .chart-section {
+            margin-bottom: 2.5rem;
+        }
+        .chart-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-dark);
+            margin-bottom: 1.5rem;
+        }
+        .chart-section h2 .suite-name {
+            color: var(--color-primary-base);
+            border-bottom: 2px solid var(--color-primary-base);
+        }
+        .chart-section .card {
+            min-height: 400px;
+        }
+
+        /* Floating export button */
+        #exportPngBtn {
+            position: fixed;
+            right: 55px;
+            top: 100px;
+            z-index: 9999;
+            background: linear-gradient(90deg,#4f46e5,#2563eb);
+            color: #fff;
+            border: none;
+            padding: 10px 14px;
+            font-weight: 700;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(63,63,255,0.18);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #exportPngBtn:hover { transform: translateY(-2px); transition: all .18s ease; }
+        #exportPngBtn .dot { width:8px; height:8px; background:#fff; border-radius:50%; opacity:0.9; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+
+        /* small responsive fix for control area */
+        .control-section { display:flex; align-items:center; justify-content:flex-start; gap:12px; flex-wrap:wrap; }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+                lucide.createIcons();
+            }
+            // Register ChartDataLabels plugin globally
+            if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+            // Logic to run charts (some functions are in charts_dashboard.js)
+            if (typeof initializeDefaultData === 'function') {
+                initializeDefaultData();
+            }
+
+            const suiteSelector = document.getElementById('suiteSelector');
+            suiteSelector.value = 'Regression';
+
+            if (typeof updateCharts === 'function') {
+                updateCharts(suiteSelector.value);
+            }
+
+            suiteSelector.addEventListener('change', (event) => {
+                if (typeof updateCharts === 'function') {
+                    updateCharts(event.target.value);
+                }
+            });
+
+            // Wire up floating export button to function defined in charts_dashboard.js
+            const exportBtn = document.getElementById('exportPngBtn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', () => {
+                    if (typeof window.exportDashboardPNG === 'function') {
+                        window.exportDashboardPNG();
+                    } else {
+                        // If function not ready yet, provide small fallback: capture container
+                        if (typeof html2canvas !== 'undefined') {
+                            html2canvas(document.body, { scale: 2 }).then(canvas => {
+                                const a = document.createElement('a');
+                                a.href = canvas.toDataURL('image/png');
+                                a.download = `dashboard-export-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.png`;
+                                a.click();
+                            });
+                        } else {
+                            alert('Export function not available yet.');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+    <!-- Floating Export Button -->
+    <button id="exportPngBtn" title="Export full page as PNG">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l4-4m-4 4L8 11M21 21H3"/></svg>
+        Export PNG
+    </button>
+
+    <header>
+        <div class="container">
+            <h1>
+                <i data-lucide="bar-chart-2" class="w-7 h-7 mr-3 text-[var(--color-primary-base)]"></i>
+                Test Execution Charts
+            </h1>
+            <nav>
+                <a href="index.html" class="px-4 py-2 text-sm font-semibold text-white bg-[var(--color-primary-base)] rounded-lg hover:bg-[var(--color-primary-dark)] transition shadow-md flex items-center">
+                    <i data-lucide="home" class="w-4 h-4 mr-1"></i>
+                    Back to Home
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container py-4">
+        <div class="control-section mb-8">
+            <h3 class="text-lg font-bold text-gray-700 mr-4">Viewing Suite:</h3>
+            <select id="suiteSelector"
+                class="block w-48 px-4 py-2 font-bold text-[var(--color-primary-base)] bg-white border-2 border-[var(--color-primary-base)] rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-100 transition">
+                <option value="Regression">REGRESSION</option>
+                <option value="Sanity">SANITY</option>
+            </select>
+        </div>
+
+        <div class="kpi-summary-row">
+            <div class="mini-kpi-stack grid grid-cols-1 gap-6">
+                <div class="card kpi-card">
+                    <div class="flex items-center justify-between">
+                        <h3 class="kpi-label">Total Cases</h3>
+                        <i data-lucide="list-checks" class="w-6 h-6 text-gray-400"></i>
+                    </div>
+                    <p id="totalCasesKPI" class="kpi-value primary">0</p>
+                </div>
+
+                <div class="card kpi-card">
+                    <div class="flex items-center justify-between">
+                        <h3 class="kpi-label">Overall Pass Rate</h3>
+                        <i data-lucide="trending-up" class="w-6 h-6 text-gray-400"></i>
+                    </div>
+                    <p id="passRateKPI" class="kpi-value success">0%</p>
+                </div>
+            </div>
+
+            <div class="card large-pie-chart-card">
+                <h3 class="pie-label">Consolidated <span id="pieChartSuiteName" class="text-[var(--color-primary-base)] font-extrabold">REGRESSION</span> Status</h3>
+
+                <div class="chart-wrapper suite-pie-chart-wrapper">
+                    <canvas id="suiteConsolidatedChart"></canvas>
+                </div>
+
+                <div id="pieChartInfo" class="text-center mt-6 text-sm text-gray-500">
+                    <p class="font-medium">Total Execution: <span id="totalCasesPieInfo">0</span> Cases</p>
+                </div>
+            </div>
+        </div>
+
+        <section class="chart-section">
+            <h2>Daily Execution Trend (<span id="trendChartSuiteName" class="suite-name">REGRESSION</span>)</h2>
+            <div class="card chart-wrapper">
+                <canvas id="dailyExecutionTrendChart"></canvas>
+            </div>
+        </section>
+
+        <div class="main-charts-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <section class="chart-section">
+                <h2>Tester Execution Breakdown (<span id="testerChartSuiteName" class="suite-name">REGRESSION</span>)</h2>
+                <div class="card chart-wrapper">
+                    <canvas id="testerPerformanceChart"></canvas>
+                </div>
+            </section>
+
+            <section class="chart-section">
+                <h2>Module Completion Status (<span id="moduleChartSuiteName" class="suite-name">REGRESSION</span>)</h2>
+                <div class="card chart-wrapper">
+                    <canvas id="moduleCompletionChart"></canvas>
+                </div>
+            </section>
+        </div>
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/charts_dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Testing Dashboard Overview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Styles for a modern, 'advanced' dashboard look (Copied for consistency) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        /* Darker, softer background to contrast with cards */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #e9ecef; /* Light gray/off-white */
+        } 
+
+        /* Main container for spacing */
+        .container { 
+            max-width: 1300px; 
+            margin: 0 auto; 
+            padding: 2rem 1.5rem; 
+        }
+
+        /* Enhanced Card Styling (Metric Cards, Module Cards) */
+        .card-style {
+            /* Glassmorphism Effect */
+            background-color: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(8px); /* Frosted glass effect */
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 1rem; /* Softer corners */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        .card-style:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        
+        /* Metrics Section */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .metric-card.overall { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .metric-card.passed { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+        .metric-card.failed { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; }
+        .metric-card.pending { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
+
+        .module-card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .module-card p {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        .module-card #main-dashboard-sanity-status,
+        .module-card #main-dashboard-regression-status,
+        /* Added the new Automation status ID */
+        .module-card #main-dashboard-automation-status { 
+            font-weight: 600;
+            color: #4b5563;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-8">Main Testing Dashboard Overview</h1>
+        
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold mb-4 text-gray-700">Global Execution Metrics</h2>
+            <div id="global-metrics-anchor" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                
+                <div class="metric-card overall card-style">
+                    <div class="value" id="global-overall-completion">0.0%</div> 
+                    <div class="label">Overall Completion</div>
+                </div>
+
+                <div class="metric-card passed card-style">
+                    <div class="value" id="global-total-passed">0</div> 
+                    <div class="label">Total Passed</div>
+                </div>
+                
+                <div class="metric-card failed card-style">
+                    <div class="value" id="global-total-failed">0</div>
+                    <div class="label">Total Failed</div>
+                </div>
+                
+                <div class="metric-card pending card-style">
+                    <div class="value" id="global-total-pending">0</div>
+                    <div class="label">Total Pending</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold mb-4 text-gray-700">Main Testing Modules</h2>
+            <div class="dashboard-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div class="module-card card-style p-6" onclick="window.location.href='sanity_dashboard.html'">
+                    <h2>Sanity Suites Testing 🧩</h2>
+                    <p>Quick Test of key features after production deployment.</p>
+                    <p id="main-dashboard-sanity-status">Status: **Loading...**</p> 
+                </div>
+
+                <div class="module-card card-style p-6" onclick="window.location.href='regression_dashboard.html'">
+                    <h2>Regression Suites Testing ♻️</h2>
+                    <p>Detailed testing of existing functionality after changes.</p>
+                    <p id="main-dashboard-regression-status">Status: **Loading...**</p>
+                </div>
+               
+			    <!--  Automation Katalon Studio Dashboard
+               <div class="module-card card-style p-6" onclick="window.location.href='file:///D:/Katalon%20Studio/Automation/dashboard.html'">
+                 <h2>Automation Dashboard (Katalon) 🤖</h2>
+                 <p>View your dedicated real-time results and analysis.</p>
+                 <p id="main-dashboard-automation-status">Status: **Direct File Link**</p>
+               </div>  -->
+			   
+                <div class="module-card card-style p-6" onclick="window.location.href='charts_dashboard.html'">
+                    <h2>Test Execution Charts 📊</h2>
+                    <p>Analyze tester and module efficiency.</p>
+                    <p>Click to view details.</p>
+                </div>
+            </div>
+        </section>
+        
+    </div>
+    
+    <script src="js/dashboard.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             // CRITICAL: Initialize data if not present 
+            if (typeof initializeDefaultData === 'function') {
+                initializeDefaultData();
+            }
+
+            if (typeof renderGlobalMetrics === 'function') {
+                renderGlobalMetrics(); 
+            }
+            if (typeof renderMainDashboardSummary === 'function') {
+                // You may need to update 'js/dashboard.js' to include logic 
+                // for the new 'main-dashboard-automation-status' ID if you want it updated dynamically.
+                renderMainDashboardSummary();
+            }
+            
+            // NOTE: The logic for rendering metrics and statuses (e.g., renderGlobalMetrics, renderMainDashboardSummary)
+            // is expected to be implemented in 'js/dashboard.js'
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Regression Test - Service</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Regression Test: Service Module</h1>
+           <nav style="display:flex;gap:10px;margin-bottom:15px;">
+  <a href="index.html" class="btn">🏠 Home</a>
+  <a href="regression_dashboard.html" class="btn">⬅️ Regression Dashboard</a>
+</nav>
+
+<style>
+.btn {
+  padding:6px 14px;
+  border-radius:9999px;
+  text-decoration:none;
+  font-weight:600;
+  color:#fff;
+  background:linear-gradient(135deg,#00bfa5,#00796b);
+  box-shadow:0 0 10px rgba(0,255,200,0.4);
+  transition:0.3s;
+}
+.btn:hover {
+  background:linear-gradient(135deg,#1de9b6,#00bfa5);
+  box-shadow:0 0 20px rgba(0,255,200,0.6);
+  transform:translateY(-2px);
+}
+</style>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="metrics-section">
+            <h2>Overall Regression Metrics</h2>
+            <div class="metrics-container" id="globalMetricsContainer">
+                <div class="metric-card overall">
+                    <div class="value" id="overallCompletion">Loading...</div>
+                    <div class="label">Overall Completion</div>
+                </div>
+                <div class="metric-card passed">
+                    <div class="value" id="totalPassed">Loading...</div>
+                    <div class="label">Total Passed</div>
+                </div>
+                <div class="metric-card failed">
+                    <div class="value" id="totalFailed">Loading...</div>
+                    <div class="label">Total Failed</div>
+                </div>
+                <div class="metric-card pending">
+                    <div class="value" id="totalPending">Loading...</div>
+                    <div class="label">Total Pending</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="control-section">
+            <h2>Service Test Cases</h2>
+            <div class="actions">
+                <button class="btn teal" onclick="sendDataToServer()">💾 Save All Data</button>
+  <button class="btn green" onclick="addTestCase()">➕ Add New Test Case</button>
+  <button class="btn blue" onclick="exportDataToCSV()">📤 Export to CSV</button>
+  <button class="btn red" onclick="resetCurrentModuleExecution()">⚠️ Reset All Statuses</button>
+</div>
+
+<style>
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+/* Base futuristic style */
+.btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 9999px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* === Color Themes === */
+.btn.teal  { background: linear-gradient(135deg,#00bfa5,#00796b); }
+.btn.green { background: linear-gradient(135deg,#43a047,#2e7d32); }
+.btn.blue  { background: linear-gradient(135deg,#2196f3,#1565c0); }
+.btn.red   { background: linear-gradient(135deg,#e53935,#b71c1c); }
+
+/* === Hover Neon Glows === */
+.btn.teal:hover  { box-shadow: 0 0 15px #00ffe0, 0 0 30px #00ffe0; }
+.btn.green:hover { box-shadow: 0 0 15px #00ff66, 0 0 30px #00ff66; }
+.btn.blue:hover  { box-shadow: 0 0 15px #00b0ff, 0 0 30px #00b0ff; }
+.btn.red:hover   { box-shadow: 0 0 15px #ff1744, 0 0 30px #ff1744; }
+
+.btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.15);
+}
+</style>
+        </section>
+
+        <section class="table-section">
+            <table id="testCaseTable" class="test-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">ID</th>
+                        <th style="width: 120px;">Sub Module</th>
+                        <th style="width: 150px;">Test Case</th>
+                        <th style="width: 200px;">Test Steps</th>
+                        <th style="width: 120px;">Test Data</th>
+                        <th style="width: 150px;">Expected Result</th>
+                        <th style="width: 150px;">Actual Result</th>
+                        <th style="width: 80px;">Tester</th>
+                        <th style="width: 80px;">Status</th>
+                        <th style="width: 120px;">Date/Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="row_001" data-static="true" class="pending">
+                        <td class="test-case-id">001</td>
+                        <td>Route Setup</td>
+                        <td>Verify Existing Route Edit</td>
+                        <td>1. Open Service.<br>2. Enter Start/End Points.<br>3. Save route.</td>
+                        <td>Valid Street Addresses</td>
+                        <td>Route is created and visible in the map view.</td>
+                        <td><textarea rows="3" placeholder="Enter actual result"></textarea></td>
+                        <td>
+                            <select class="tester-name">
+                                <option value="Imran" selected>Imran</option>
+                                <option value="John">John</option>
+                                <option value="ABC">ABC</option>
+                                <option value="XYZ">XYZ</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="status-select" onchange="updateStatusAndTimestamp(this, 'timestamp_001')">
+                                <option value="Pending" selected>Pending</option>
+                                <option value="Pass">Pass</option>
+                                <option value="Fail">Fail</option>
+                            </select>
+                        </td>
+                        <td id="timestamp_001">N/A</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+    
+    <script src="js/dashboard.js"></script>
+    <script src="js/regression_test_suite.js"></script>
+    
+   <script>
+        // CRITICAL: Define the key for the current module for saving/loading
+        window.MODULE_KEY = 'testingDataRegressionServices';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for the required function (defined in regression_test_suite.js)
+            if (typeof window.initializeRegressionModule === 'function') {
+                window.initializeRegressionModule(window.MODULE_KEY);
+            } else {
+                console.error("Initialization failed: Check if dashboard.js and regression_test_suite.js are loaded correctly, or if initializeRegressionModule is defined.");
+                // NOTE: The metrics will still load via renderModuleMetrics inside dashboard.js 
+                // if the table data loading fails, but it's best to have a robust init.
+                if (typeof renderModuleMetrics === 'function') {
+                    renderModuleMetrics(window.MODULE_KEY);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
