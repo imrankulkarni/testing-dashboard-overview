@@ -9,9 +9,6 @@ const STORAGE_KEYS = {
     SANITY_SCHEDULES: 'testingDataSanitySchedules',
 
     // Regression Test Modules
-    REGRESSION_ROUTE_MASTER: 'testingDataRegressionRouteMaster',
-    REGRESSION_SERVICES: 'testingDataRegressionServices',
-    REGRESSION_SCHEDULES: 'testingDataRegressionSchedules',
     REGRESSION_COUNTERS: 'testingDataRegressionCounters',
     
 
@@ -30,6 +27,11 @@ const STORAGE_KEYS = {
     REGRESSION_MANAGE_PAGE_USERS: 'testingDataRegressionUsers',
     REGRESSION_MANAGE_PAGE_BRANCHES: 'testingDataRegressionBranches',
     REGRESSION_MANAGE_PAGE_COACHES: 'testingDataRegressionCoaches',
+	
+		// --- UPDATED KEYS FOR REPORTS (ONLY 2 MODULES) ---
+    REGRESSION_ROUTEMANAGER_PAGE_ROUTEMASTER: 'testingDataRegressionRoutemaster',
+    REGRESSION_ROUTEMANAGER_PAGE_SERVICES: 'testingDataRegressionServices',
+    REGRESSION_ROUTEMANAGER_PAGE_SCHEDULES: 'testingDataRegressionSchedules',
 	
     // High-Level Suites
     REGRESSION_DASHBOARD: 'testingDataRegressionDashboard',
@@ -156,18 +158,30 @@ function getManageModuleKeys() {
     ];
 }
 window.getManageModuleKeys = getManageModuleKeys;
+
+/**
+ * UPDATED: Returns the list of keys for the ROUTEMANAGER.
+ */
+function getRoutemanagerModuleKeys() {
+    return [
+        STORAGE_KEYS.REGRESSION_ROUTEMANAGER_PAGE_ROUTEMASTER,
+        STORAGE_KEYS.REGRESSION_ROUTEMANAGER_PAGE_SERVICES,
+		STORAGE_KEYS.REGRESSION_ROUTEMANAGER_PAGE_SCHEDULES
+		
+    ];
+}
+window.getRoutemanagerModuleKeys = getRoutemanagerModuleKeys;
+
 /**
  * Returns the list of keys for the Regression suite modules (including Quick Links).
  */
 function getRegressionModuleKeys() {
     return [
-        STORAGE_KEYS.REGRESSION_ROUTE_MASTER, 
-        STORAGE_KEYS.REGRESSION_SERVICES, 
-        STORAGE_KEYS.REGRESSION_SCHEDULES,
         STORAGE_KEYS.REGRESSION_COUNTERS,
         ...getHomePageQuickLinksModuleKeys(),
         ...getReportsModuleKeys(),
-        ...getManageModuleKeys()		// Includes the 2 Quick Links modules
+        ...getManageModuleKeys(),		
+		...getRoutemanagerModuleKeys()    // Includes the 2 Quick Links modules
     ];
 }
 window.getRegressionModuleKeys = getRegressionModuleKeys; 
@@ -371,9 +385,6 @@ async function renderRegressionModuleStatuses() {
     container.innerHTML = '';
 
     const baseModules = [
-        { key: STORAGE_KEYS.REGRESSION_ROUTE_MASTER, title: 'Route Master Test Cases', link: 'regression_route_master_tests.html' },
-        { key: STORAGE_KEYS.REGRESSION_SERVICES, title: 'Service Test Cases', link: 'regression_service_module_tests.html' },
-        { key: STORAGE_KEYS.REGRESSION_SCHEDULES, title: 'Schedules Test Cases', link: 'regression_schedules_module_tests.html' },
         { key: STORAGE_KEYS.REGRESSION_COUNTERS, title: 'Counters Test Cases', link: 'regression_counters_module_tests.html' }
     ];
 
@@ -418,9 +429,23 @@ async function renderRegressionModuleStatuses() {
         metrics: manageMetrics, 
         isGroup: true 
     };
+	
+	// 4. Calculate Route Manager combined metrics
+    const routemanagerKeys = getRoutemanagerModuleKeys();
+    let allRoutemanagerTestCases = [];
+    for (const key of routemanagerKeys) {
+        allRoutemanagerTestCases.push(...await fetchData(key));
+    }
+    const routemanagerMetrics = calculateMetrics(allRoutemanagerTestCases);
+    const routemanagerModuleGroup = { 
+        title: 'Routemanager Test Cases', 
+        link: 'regression_Routes_Manager_tests.html', 
+        metrics: routemanagerMetrics, 
+        isGroup: true 
+    };
 
     // Combine all modules and groups (THE CORRECTED LINE)
-    const modules = [...baseModules, quickLinksModuleGroup, reportsModuleGroup, manageModuleGroup]; 
+    const modules = [...baseModules, quickLinksModuleGroup, reportsModuleGroup, manageModuleGroup, routemanagerModuleGroup]; 
 
     for (const mod of modules) {
         // Use pre-calculated metrics for groups, or fetch for single modules
@@ -502,24 +527,7 @@ function initializeDefaultData() {
     localStorage.setItem(STORAGE_KEYS.SANITY_SCHEDULES, JSON.stringify(sanitySchedules));
 
     // Regression Modules 
-    const regressionRouteMaster = [
-        dummyTestCase(1, 'Permissions', 'Verify Admin access to Settings', 'Admin user can access /settings path.'),
-        dummyTestCase(2, 'Permissions', 'Verify Guest access to Settings', 'Guest user is blocked from /settings and redirected to /login.'),
-        dummyTestCase(3, 'Localization', 'Verify French language load', 'All key UI elements are displayed in French.'),
-    ];
-    localStorage.setItem(STORAGE_KEYS.REGRESSION_ROUTE_MASTER, JSON.stringify(regressionRouteMaster));
-
-    const regressionServices = [
-        dummyTestCase(1, 'Auth', 'Verify password complexity rules', 'Password update enforces minimum 8 chars, 1 uppercase, 1 number.'),
-        dummyTestCase(2, 'Logging', 'Verify successful login logging', 'Login attempt is recorded in security logs with user ID and timestamp.'),
-    ];
-    localStorage.setItem(STORAGE_KEYS.REGRESSION_SERVICES, JSON.stringify(regressionServices));
-    
-    const regressionSchedules = [
-        dummyTestCase(1, 'Data Cleanup', 'Verify log trimming process', 'Logs older than 90 days are successfully removed.'),
-    ];
-    localStorage.setItem(STORAGE_KEYS.REGRESSION_SCHEDULES, JSON.stringify(regressionSchedules));
-    
+	
     const regressionCounters = [
         dummyTestCase(1, 'Tracking', 'Verify unique visitor counter', 'The visitor count increments by 1 for a new session.'),
     ];
@@ -583,6 +591,26 @@ function initializeDefaultData() {
         dummyTestCase(2, 'Details', 'Verify ticket details view', 'Clicking on a ticket shows all trip details.'),
     ];
     localStorage.setItem(STORAGE_KEYS.REGRESSION_MANAGE_PAGE_COACHES, JSON.stringify(ManageCoaches));
+	
+	// UPDATED: ROUTEMANAGER
+	
+	 const RoutemanagerRoutemaster = [
+        dummyTestCase(1, 'Block User', 'Verify blocking non-existent user', 'System shows "User not found" error.'),
+        dummyTestCase(2, 'Block User', 'Verify blocking an active user', 'User is successfully blocked and status changes.'),
+    ];
+    localStorage.setItem(STORAGE_KEYS.REGRESSION_ROUTEMANAGER_PAGE_ROUTEMASTER, JSON.stringify(RoutemanagerRoutemaster));
+
+    const RoutemanagerServices = [
+        dummyTestCase(1, 'Search', 'Verify search by date range', 'History shows bookings within the selected date range.'),
+        dummyTestCase(2, 'Details', 'Verify booking details view', 'Clicking on a booking shows all trip details.'),
+    ];
+    localStorage.setItem(STORAGE_KEYS.REGRESSION_ROUTEMANAGER_PAGE_SERVICES, JSON.stringify(RoutemanagerServices));
+	
+	const RoutemanagerSchedules = [
+        dummyTestCase(1, 'Search', 'Verify search by date range', 'History shows ticket within the selected date range.'),
+        dummyTestCase(2, 'Details', 'Verify ticket details view', 'Clicking on a ticket shows all trip details.'),
+    ];
+    localStorage.setItem(STORAGE_KEYS.REGRESSION_ROUTEMANAGER_PAGE_SCHEDULES, JSON.stringify(RoutemanagerSchedules));
     
     console.log("Initialization complete.");
 }

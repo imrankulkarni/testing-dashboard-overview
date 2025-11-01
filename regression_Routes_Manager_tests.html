@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage - Testing</title>
+    <title>Route Manager - Testing</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
@@ -56,9 +56,9 @@
             border-bottom: 3px solid;
         }
         
-        .module-section.users .module-header { border-color: #3b82f6; }
-        .module-section.branches .module-header { border-color: #8b5cf6; }
-		.module-section.coaches .module-header { border-color: #8b5cf6; }
+        .module-section.routemaster .module-header { border-color: #3b82f6; }
+        .module-section.services .module-header { border-color: #8b5cf6; }
+		.module-section.schedules .module-header { border-color: #8b5cf6; }
         
         .module-title {
             font-size: 1.5rem;
@@ -188,7 +188,7 @@
         
         <div class="utility-bar">
             <div>
-                <h1 style="font-size: 2rem; font-weight: 800; color: #1f2937; margin: 0;">Manage Modules 🔗</h1>
+                <h1 style="font-size: 2rem; font-weight: 800; color: #1f2937; margin: 0;">Route Manager Modules 🔗</h1>
 
             </div>
             <div class="actions" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;">
@@ -230,7 +230,7 @@
         </div>
 
         <section style="margin-bottom: 2rem;">
-            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #374151;">Manage Testing</h2>
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #374151;">Route Manager Testing</h2>
             <div class="metrics-grid">
                 <div class="metric-card overall">
                     <div class="metric-value" id="combinedCompletion">0.0%</div>
@@ -253,17 +253,17 @@
 
         <div class="test-cases-container">
             
-            <div class="module-section users">
+            <div class="module-section routemaster">
 			<div class="module-header">
-                    <h3 class="module-title" style="color: #3b82f6;">🧑‍💻 Users</h3>
+                    <h3 class="module-title" style="color: #3b82f6;">🧑‍💻 Route Master</h3>
                     <div class="module-actions">
-                        <button class="btn btn-add" id="addUsersBtn">➕ Add</button>
-                        <button class="btn btn-save" id="saveUsersBtn">💾 Save</button>
+                        <button class="btn btn-add" id="addRoutemasterBtn">➕ Add</button>
+                        <button class="btn btn-save" id="saveRoutemasterBtn">💾 Save</button>
                     </div>
                 </div>
                 
                 <div style="overflow-x: auto;">
-                    <table class="test-table" id="usersTable">
+                    <table class="test-table" id="routemasterTable">
                         <thead>
                             <tr>
                                 <th style="width: 50px;">ID</th>
@@ -277,23 +277,23 @@
                                 <th style="width: 130px;">Date/Time</th>
                             </tr>
                         </thead>
-                        <tbody id="usersTableBody">
+                        <tbody id="routemasterTableBody">
                             </tbody>
                     </table>
                 </div>
             </div>
 
-            <div class="module-section branches">
+            <div class="module-section services">
                 <div class="module-header">
-                    <h3 class="module-title" style="color: #8b5cf6;">🏢 Branches</h3>
+                    <h3 class="module-title" style="color: #8b5cf6;">🏢 Services</h3>
                     <div class="module-actions">
-                        <button class="btn btn-add" id="addBranchesBtn">➕ Add</button>
-                        <button class="btn btn-save" id="saveBranchesBtn">💾 Save</button>
+                        <button class="btn btn-add" id="addServicesBtn">➕ Add</button>
+                        <button class="btn btn-save" id="saveServicesBtn">💾 Save</button>
                     </div>
                 </div>
                 
                 <div style="overflow-x: auto;">
-                    <table class="test-table" id="branchesTable">
+                    <table class="test-table" id="servicesTable">
                         <thead>
                             <tr>
                                 <th style="width: 50px;">ID</th>
@@ -307,23 +307,23 @@
                                 <th style="width: 130px;">Date/Time</th>
                             </tr>
                         </thead>
-                        <tbody id="branchesTableBody">
+                        <tbody id="servicesTableBody">
                             </tbody>
                     </table>
                 </div>
             </div>
 			
-			<div class="module-section coaches">
+			<div class="module-section schedules">
                 <div class="module-header">
-                    <h3 class="module-title" style="color: #8b5cf6;">🚏 Coaches</h3>
+                    <h3 class="module-title" style="color: #8b5cf6;">🚏 Schedules</h3>
                     <div class="module-actions">
-                        <button class="btn btn-add" id="addCoachesBtn">➕ Add</button>
-                        <button class="btn btn-save" id="saveCoachesBtn">💾 Save</button>
+                        <button class="btn btn-add" id="addSchedulesBtn">➕ Add</button>
+                        <button class="btn btn-save" id="saveSchedulesBtn">💾 Save</button>
                     </div>
                 </div>
                 
                 <div style="overflow-x: auto;">
-                    <table class="test-table" id="coachesTable">
+                    <table class="test-table" id="schedulesTable">
                         <thead>
                             <tr>
                                 <th style="width: 50px;">ID</th>
@@ -337,7 +337,7 @@
                                 <th style="width: 130px;">Date/Time</th>
                             </tr>
                         </thead>
-                        <tbody id="coachesTableBody">
+                        <tbody id="schedulesTableBody">
                             </tbody>
                     </table>
                 </div>
@@ -350,11 +350,11 @@
 <script src="js/dashboard.js"></script>
 
 <script>
-    // Renamed local STORAGE_KEYS to MANAGE_KEYS to avoid naming conflict with dashboard.js
-    const MANAGE_KEYS = {
-        USERS: 'testingDataRegressionUsers',
-        BRANCHES: 'testingDataRegressionBranches',
-        COACHES: 'testingDataRegressionCoaches'
+    // Renamed local STORAGE_KEYS to ROUTEMANAGER_KEYS to avoid naming conflict with dashboard.js
+    const ROUTEMANAGER_KEYS = {
+        ROUTEMASTER: 'testingDataRegressionRoutemaster',
+        SERVICES: 'testingDataRegressionServices',
+        SCHEDULES: 'testingDataRegressionSchedules'
     };
 
     const TESTERS = ['Imran', 'John', 'Naresh', 'Saliq', 'Yusuf'];
@@ -367,9 +367,9 @@
         EXPECTED_RESULT: 'Expected outcome here'
     };
     
-    let usersCounter = 1;
-    let branchesCounter = 1;
-    let coachesCounter = 1;
+    let routemasterCounter = 1;
+    let servicesCounter = 1;
+    let schedulesCounter = 1;
 
     // Helper to escape HTML
     function escapeHtml(text) {
@@ -391,9 +391,9 @@
 
     // Load and render test cases for a module
 async function loadModuleData(moduleType) {
-    const key = moduleType === 'users' ? MANAGE_KEYS.USERS :
-                moduleType === 'branches' ? MANAGE_KEYS.BRANCHES :
-                MANAGE_KEYS.COACHES;
+    const key = moduleType === 'routemaster' ? ROUTEMANAGER_KEYS.ROUTEMASTER :
+                moduleType === 'services' ? ROUTEMANAGER_KEYS.SERVICES :
+                ROUTEMANAGER_KEYS.SCHEDULES;
 
     let data = [];
     try {
@@ -414,17 +414,17 @@ async function loadModuleData(moduleType) {
     // Update counter
     if (data.length > 0) {
         const maxId = Math.max(...data.map(item => parseInt(item.id) || 0));
-        if (moduleType === 'users') usersCounter = maxId + 1;
-        else if (moduleType === 'branches') branchesCounter = maxId + 1;
-        else coachesCounter = maxId + 1;
+        if (moduleType === 'routemaster') routemasterCounter = maxId + 1;
+        else if (moduleType === 'services') servicesCounter = maxId + 1;
+        else schedulesCounter = maxId + 1;
     }
 }
 
 // Render table rows
 function renderTable(moduleType, data) {
-    const tableBodyId = moduleType === 'users' ? 'usersTableBody' :
-                        moduleType === 'branches' ? 'branchesTableBody' :
-                        'coachesTableBody';
+    const tableBodyId = moduleType === 'routemaster' ? 'routemasterTableBody' :
+                        moduleType === 'services' ? 'servicesTableBody' :
+                        'schedulesTableBody';
     const tbody = document.getElementById(tableBodyId);
     tbody.innerHTML = '';
 
@@ -494,12 +494,12 @@ function createTableRow(moduleType, item) {
         
         // Get current counter and increment
     let newId;
-    if (moduleType === 'users') {
-        newId = usersCounter++;
-    } else if (moduleType === 'branches') {
-        newId = branchesCounter++;
+    if (moduleType === 'routemaster') {
+        newId = routemasterCounter++;
+    } else if (moduleType === 'services') {
+        newId = servicesCounter++;
     } else { 
-        newId = coachesCounter++;
+        newId = schedulesCounter++;
     }
         
         // FIX: Set isDefined to false to make it editable
@@ -516,7 +516,7 @@ function createTableRow(moduleType, item) {
             isDefined: false // This flag makes the row editable
         };
         
-        const key = moduleType === 'users' ? MANAGE_KEYS.USERS : moduleType === 'branches' ? MANAGE_KEYS.BRANCHES : MANAGE_KEYS.COACHES;
+        const key = moduleType === 'routemaster' ? ROUTEMANAGER_KEYS.ROUTEMASTER : moduleType === 'services' ? ROUTEMANAGER_KEYS.SERVICES : ROUTEMANAGER_KEYS.SCHEDULES;
         const data = JSON.parse(localStorage.getItem(key) || '[]');
         
         // Add new case
@@ -536,8 +536,8 @@ function createTableRow(moduleType, item) {
 
     // Save module data (FIXED LOGIC)
     function saveModuleData(moduleType, isAutoSave = false) {
-        const tableBodyId = moduleType === 'users' ? 'usersTableBody' : moduleType === 'branches' ? 'branchesTableBody' : 'coachesTableBody';
-        const key = moduleType === 'users' ? MANAGE_KEYS.USERS : moduleType === 'branches' ? MANAGE_KEYS.BRANCHES : MANAGE_KEYS.COACHES;
+        const tableBodyId = moduleType === 'routemaster' ? 'routemasterTableBody' : moduleType === 'services' ? 'servicesTableBody' : 'schedulesTableBody';
+        const key = moduleType === 'routemaster' ? ROUTEMANAGER_KEYS.ROUTEMASTER : moduleType === 'services' ? ROUTEMANAGER_KEYS.SERVICES : ROUTEMANAGER_KEYS.SCHEDULES;
         const tbody = document.getElementById(tableBodyId);
         const rows = tbody.querySelectorAll('tr');
         
@@ -578,16 +578,16 @@ function createTableRow(moduleType, item) {
         
         if (!isAutoSave) {
             
-    alert(`${moduleType === 'users' ? 'Users' : moduleType === 'branches' ? 'Branches' : 'Coaches'} data saved successfully!`);
+    alert(`${moduleType === 'routemaster' ? 'Routemaster' : moduleType === 'services' ? 'Services' : 'Schedules'} data saved successfully!`);
         }
     }
 
     // Update combined metrics
         function updateCombinedMetrics() {
-        const usersData = JSON.parse(localStorage.getItem(MANAGE_KEYS.USERS) || '[]');
-        const branchesData = JSON.parse(localStorage.getItem(MANAGE_KEYS.BRANCHES) || '[]');
-        const coachesData = JSON.parse(localStorage.getItem(MANAGE_KEYS.COACHES) || '[]');
-        const allData = [...usersData, ...branchesData, ...coachesData];
+        const routemasterData = JSON.parse(localStorage.getItem(ROUTEMANAGER_KEYS.ROUTEMASTER) || '[]');
+        const servicesData = JSON.parse(localStorage.getItem(ROUTEMANAGER_KEYS.SERVICES) || '[]');
+        const schedulesData = JSON.parse(localStorage.getItem(ROUTEMANAGER_KEYS.SCHEDULES) || '[]');
+        const allData = [...routemasterData, ...servicesData, ...schedulesData];
 
         const total = allData.length;
         const passed = allData.filter(item => item.status === 'Pass').length;
@@ -603,9 +603,9 @@ function createTableRow(moduleType, item) {
 
     // Export combined data to CSV
     function exportCombinedData() {
-        const usersData = JSON.parse(localStorage.getItem(MANAGE_KEYS.USERS) || '[]');
-        const branchesData = JSON.parse(localStorage.getItem(MANAGE_KEYS.BRANCHES) || '[]');
-        const coachesData = JSON.parse(localStorage.getItem(MANAGE_KEYS.COACHES) || '[]');
+        const routemasterData = JSON.parse(localStorage.getItem(ROUTEMANAGER_KEYS.ROUTEMASTER) || '[]');
+        const servicesData = JSON.parse(localStorage.getItem(ROUTEMANAGER_KEYS.SERVICES) || '[]');
+        const schedulesData = JSON.parse(localStorage.getItem(ROUTEMANAGER_KEYS.SCHEDULES) || '[]');
         
         const headers = ['Module', 'ID', 'Sub Module', 'Test Case', 'Test Steps', 'Expected Result', 'Actual Result', 'Tester', 'Status', 'Date/Time'];
         const csvRows = [headers.join(',')];
@@ -616,10 +616,10 @@ function createTableRow(moduleType, item) {
             return `"${cleaned}"`;
         };
 
-        // Add users data
-        usersData.forEach(item => {
+        // Add routemaster data
+        routemasterData.forEach(item => {
             const row = [
-                cleanAndQuote('Users'),
+                cleanAndQuote('Routemaster'),
                 cleanAndQuote(String(item.id).padStart(3, '0')),
                 cleanAndQuote(item.subModule),
                 cleanAndQuote(item.testCase),
@@ -633,10 +633,10 @@ function createTableRow(moduleType, item) {
             csvRows.push(row.join(','));
         });
 
-        // Add branches data
-        branchesData.forEach(item => {
+        // Add services data
+        servicesData.forEach(item => {
             const row = [
-                cleanAndQuote('Branches'),
+                cleanAndQuote('Services'),
                 cleanAndQuote(String(item.id).padStart(3, '0')),
                 cleanAndQuote(item.subModule),
                 cleanAndQuote(item.testCase),
@@ -650,10 +650,10 @@ function createTableRow(moduleType, item) {
             csvRows.push(row.join(','));
         });
         
-        // Add coaches data
-        coachesData.forEach(item => {
+        // Add schedules data
+        schedulesData.forEach(item => {
             const row = [
-                cleanAndQuote('Coaches'),
+                cleanAndQuote('Schedules'),
                 cleanAndQuote(String(item.id).padStart(3, '0')),
                 cleanAndQuote(item.subModule),
                 cleanAndQuote(item.testCase),
@@ -672,7 +672,7 @@ function createTableRow(moduleType, item) {
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
-        link.setAttribute("download", `Manage_Combined_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+        link.setAttribute("download", `ROUTEMANAGER_Combined_Export_${new Date().toISOString().slice(0, 10)}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -683,14 +683,14 @@ function createTableRow(moduleType, item) {
 
     // Default test cases
 function getDefaultTestCases(moduleType) {
-    if (moduleType === 'users') {
+    if (moduleType === 'routemaster') {
         return [
             {
                 id: '1',
-                subModule: 'Users',
+                subModule: 'Routemaster',
                 testCase: 'Verify Login',
-                testSteps: '1. Enter valid username and password. 2. Click Login button.',
-                expectedResult: 'System shows "User not found" error',
+                testSteps: '1. Enter valid Routemaster and password. 2. Click Login button.',
+                expectedResult: 'System shows "Routemaster not found" error',
                 actualResult: '',
                 tester: 'Unassigned',
                 status: 'Pending',
@@ -699,10 +699,10 @@ function getDefaultTestCases(moduleType) {
             },
             {
                 id: '2',
-                subModule: 'Users',
-                testCase: 'Users login',
-                testSteps: '1. Enter valid username and password. 2. Click Login button.',
-                expectedResult: 'User is successfully Users',
+                subModule: 'Routemaster',
+                testCase: 'Verify',
+                testSteps: '1. Enter valid master and password. 2. Click Login button.',
+                expectedResult: 'Verify is successfully',
                 actualResult: '',
                 tester: 'Unassigned',
                 status: 'Pending',
@@ -710,7 +710,7 @@ function getDefaultTestCases(moduleType) {
                 isDefined: true
             }
         ];
-    } else if (moduleType === 'branches') { 
+    } else if (moduleType === 'services') { 
         return [
             {
                 id: '1',
@@ -741,7 +741,7 @@ function getDefaultTestCases(moduleType) {
         return [
             {
                 id: '1',
-                subModule: 'coaches',
+                subModule: 'schedules',
                 testCase: 'Verify creating new ticket',
                 testSteps: '1. Click "New Ticket". 2. Fill in required fields. 3. Submit.',
                 expectedResult: 'Ticket created successfully and assigned to queue',
@@ -769,34 +769,34 @@ function getDefaultTestCases(moduleType) {
 
     // Initialize data on page load
     document.addEventListener('DOMContentLoaded', async () => {
-        await loadModuleData('users');
-        await loadModuleData('branches');
-        await loadModuleData('coaches');
+        await loadModuleData('routemaster');
+        await loadModuleData('services');
+        await loadModuleData('schedules');
         await updateCombinedMetrics();
 
         // Setup event listeners for buttons (avoiding inline onclick)
-        document.getElementById('addUsersBtn').addEventListener('click', function() {
-            addTestCase('users');
+        document.getElementById('addRoutemasterBtn').addEventListener('click', function() {
+            addTestCase('routemaster');
         });
 
-        document.getElementById('addBranchesBtn').addEventListener('click', function() {
-            addTestCase('branches');
+        document.getElementById('addServicesBtn').addEventListener('click', function() {
+            addTestCase('services');
         });
         
-        document.getElementById('addCoachesBtn').addEventListener('click', function() {
-            addTestCase('coaches');
+        document.getElementById('addSchedulesBtn').addEventListener('click', function() {
+            addTestCase('schedules');
         });
 
-        document.getElementById('saveUsersBtn').addEventListener('click', function() {
-            saveModuleData('users');
+        document.getElementById('saveRoutemasterBtn').addEventListener('click', function() {
+            saveModuleData('routemaster');
         });
 
-        document.getElementById('saveBranchesBtn').addEventListener('click', function() {
-            saveModuleData('branches');
+        document.getElementById('saveServicesBtn').addEventListener('click', function() {
+            saveModuleData('services');
         });
         
-        document.getElementById('saveCoachesBtn').addEventListener('click', function() {
-            saveModuleData('coaches');
+        document.getElementById('saveSchedulesBtn').addEventListener('click', function() {
+            saveModuleData('schedules');
         });
 
         document.getElementById('exportBtn').addEventListener('click', function() {
@@ -804,7 +804,7 @@ function getDefaultTestCases(moduleType) {
         });
 
         // Setup event delegation for status changes
-        document.getElementById('usersTableBody').addEventListener('change', function(e) {
+        document.getElementById('routemasterTableBody').addEventListener('change', function(e) {
             if (e.target.classList.contains('status-select')) {
                 const moduleType = e.target.getAttribute('data-module');
                 const itemId = e.target.getAttribute('data-id');
@@ -812,7 +812,7 @@ function getDefaultTestCases(moduleType) {
             }
         });
 
-        document.getElementById('branchesTableBody').addEventListener('change', function(e) {
+        document.getElementById('servicesTableBody').addEventListener('change', function(e) {
             if (e.target.classList.contains('status-select')) {
                 const moduleType = e.target.getAttribute('data-module');
                 const itemId = e.target.getAttribute('data-id');
@@ -820,7 +820,7 @@ function getDefaultTestCases(moduleType) {
             }
         });
 
-        document.getElementById('coachesTableBody').addEventListener('change', function(e) {
+        document.getElementById('schedulesTableBody').addEventListener('change', function(e) {
             if (e.target.classList.contains('status-select')) {
                 const moduleType = e.target.getAttribute('data-module');
                 const itemId = e.target.getAttribute('data-id');
