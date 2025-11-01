@@ -438,7 +438,7 @@ async function renderRegressionModuleStatuses() {
     }
     const routemanagerMetrics = calculateMetrics(allRoutemanagerTestCases);
     const routemanagerModuleGroup = { 
-        title: 'Routemanager Test Cases', 
+        title: 'Route Manager Test Cases', 
         link: 'regression_Routes_Manager_tests.html', 
         metrics: routemanagerMetrics, 
         isGroup: true 
