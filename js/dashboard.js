@@ -8,10 +8,6 @@ const STORAGE_KEYS = {
     SANITY_SERVICES: 'testingDataSanityServices',
     SANITY_SCHEDULES: 'testingDataSanitySchedules',
 
-    // Regression Test Modules
-    REGRESSION_COUNTERS: 'testingDataRegressionCounters',
-    
-
     // --- UPDATED KEYS FOR HOME PAGE QUICK LINKS (ONLY 2 MODULES) ---
     REGRESSION_HOME_PAGE_BLOCKING_HISTORY: 'testingDataRegressionBlockingHistory',
     REGRESSION_HOME_PAGE_BOOKING_HISTORY: 'testingDataRegressionBookingHistory',
@@ -177,7 +173,6 @@ window.getRoutemanagerModuleKeys = getRoutemanagerModuleKeys;
  */
 function getRegressionModuleKeys() {
     return [
-        STORAGE_KEYS.REGRESSION_COUNTERS,
         ...getHomePageQuickLinksModuleKeys(),
         ...getReportsModuleKeys(),
         ...getManageModuleKeys(),		
@@ -384,9 +379,7 @@ async function renderRegressionModuleStatuses() {
     if (!container) return;
     container.innerHTML = '';
 
-    const baseModules = [
-        { key: STORAGE_KEYS.REGRESSION_COUNTERS, title: 'Counters Test Cases', link: 'regression_counters_module_tests.html' }
-    ];
+    const baseModules = []; // REGRESSION_COUNTERS module removed
 
     // 1. Calculate Quick Links combined metrics
     const quickLinksKeys = getHomePageQuickLinksModuleKeys();
@@ -527,11 +520,7 @@ function initializeDefaultData() {
     localStorage.setItem(STORAGE_KEYS.SANITY_SCHEDULES, JSON.stringify(sanitySchedules));
 
     // Regression Modules 
-	
-    const regressionCounters = [
-        dummyTestCase(1, 'Tracking', 'Verify unique visitor counter', 'The visitor count increments by 1 for a new session.'),
-    ];
-    localStorage.setItem(STORAGE_KEYS.REGRESSION_COUNTERS, JSON.stringify(regressionCounters));
+	// REGRESSION_COUNTERS initialization removed
     
     // UPDATED: Quick Links Modules (Only 2 now)
     const quickLinksBlockingHistory = [
