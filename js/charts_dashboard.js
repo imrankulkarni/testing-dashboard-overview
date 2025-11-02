@@ -166,7 +166,7 @@ function updateKPIs(metrics) {
     }
 
     if (passRateElement) {
-        passRateElement.innerHTML = `<span style="color:#2563eb;font-weight:700;font-size:1rem;">${passRate}%</span>`;
+        passRateElement.innerHTML = `<span style="color:#16a34a;font-weight:700;font-size:3rem;">${passRate}%</span>`;
     }
 
     if (totalInfoElement) {
