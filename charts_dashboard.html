@@ -154,16 +154,9 @@
 
         /* Floating export button */
         #exportPngBtn {
-            position: fixed;
-            right: 55px;
-            top: 100px;
-            z-index: 9999;
             background: linear-gradient(90deg,#4f46e5,#2563eb);
             color: #fff;
             border: none;
-            padding: 10px 14px;
-            font-weight: 700;
-            border-radius: 10px;
             box-shadow: 0 6px 18px rgba(63,63,255,0.18);
             cursor: pointer;
             display: flex;
@@ -230,26 +223,29 @@
     </script>
 </head>
 <body>
-    <!-- Floating Export Button -->
-    <button id="exportPngBtn" title="Export full page as PNG">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l4-4m-4 4L8 11M21 21H3"/></svg>
+
+<header>
+    <div class="container">
+        <h1>
+            <i data-lucide="bar-chart-2" class="w-7 h-7 mr-3 text-[var(--color-primary-base)]"></i>
+            Test Execution Charts
+        </h1>
+        
+<nav class="flex items-center space-x-4">
+    <a href="index.html" 
+       class="px-3 py-1.5 text-sm font-semibold text-white bg-[var(--color-primary-base)] rounded-lg hover:bg-[var(--color-primary-dark)] transition shadow-md flex items-center">
+        <i data-lucide="home" class="w-4 h-4 mr-1"></i>
+        Back to Home
+    </a>
+    
+    <button id="exportPngBtn" title="Export full page as PNG"
+        class="px-3 py-1.5 text-sm font-semibold rounded-lg transition shadow-md flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l4-4m-4 4L8 11M21 21H3"/></svg>
         Export PNG
     </button>
-
-    <header>
-        <div class="container">
-            <h1>
-                <i data-lucide="bar-chart-2" class="w-7 h-7 mr-3 text-[var(--color-primary-base)]"></i>
-                Test Execution Charts
-            </h1>
-            <nav>
-                <a href="index.html" class="px-4 py-2 text-sm font-semibold text-white bg-[var(--color-primary-base)] rounded-lg hover:bg-[var(--color-primary-dark)] transition shadow-md flex items-center">
-                    <i data-lucide="home" class="w-4 h-4 mr-1"></i>
-                    Back to Home
-                </a>
-            </nav>
-        </div>
-    </header>
+</nav>
+    </div>
+</header>
 
     <div class="container py-4">
         <div class="control-section mb-8">
