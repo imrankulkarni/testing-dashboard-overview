@@ -1,417 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deployment Tickets Tracker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <style>
-        :root {
-            --color-primary-base: #4f46e5;
-            --color-primary-dark: #2563eb;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        /* Custom Table Styling for Status Colors */
-        .Pending-row { background-color: #fffbeb; }
-        .Retesting-Done-row { background-color: #ecfdf5; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deployment Tickets Tracker</title>
 
-        /* Export Button Styles */
-        #exportBtn {
-            background: linear-gradient(90deg, var(--color-primary-base), var(--color-primary-dark));
-            color: #fff;
-            border: none;
-        }
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-        /* Edit Modal Styles */
-        .edit-modal-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background-color: rgba(0, 0, 0, 0.6); z-index: 1000; 
-            display: none; justify-content: center; align-items: center;
-        }
-    </style>
+  <style>
+    :root {
+      --color-primary-base: #4f46e5;
+      --color-primary-dark: #2563eb;
+    }
+    body { font-family: 'Inter', sans-serif; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+    .Pending-row { background-color: #fffbeb !important; transition: background-color .25s ease; }
+    .Retesting-Done-row { background-color: #ecfdf5 !important; transition: background-color .25s ease; }
+    #exportBtn, #exportPngBtn { background: linear-gradient(90deg, var(--color-primary-base), var(--color-primary-dark)); color: #fff; border: none; }
+    /* Force chart to a medium fixed height and let Chart.js fill it */
+    #testerChart { height: 320px !important; max-height: 320px; }
+  </style>
 </head>
+
 <body class="bg-gray-50 min-h-screen">
+  <header class="bg-white shadow-md py-4 mb-8">
+    <div class="container flex justify-between items-center">
+      <h1 class="text-3xl font-extrabold text-gray-800 flex items-center">
+        <i data-lucide="shield-check" class="w-7 h-7 mr-3 text-green-600"></i>
+        Deployment Tickets Tracker
+      </h1>
+      <nav class="flex items-center space-x-3">
+        <a href="index.html"
+          class="px-3 py-1.5 text-sm font-semibold text-white bg-[var(--color-primary-base)] rounded-lg hover:bg-[var(--color-primary-dark)] shadow-md flex items-center">
+          <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back to Dashboard
+        </a>
 
-    <header class="bg-white shadow-md py-4 mb-8">
-        <div class="container flex justify-between items-center">
-            <h1 class="text-3xl font-extrabold text-gray-800 flex items-center">
-                <i data-lucide="shield-check" class="w-7 h-7 mr-3 text-green-600"></i>
-                Deployment Tickets Tracker
-            </h1>
-            <nav class="flex items-center space-x-4">
-                <a href="index.html" class="px-3 py-1.5 text-sm font-semibold text-white bg-[var(--color-primary-base)] rounded-lg hover:bg-[var(--color-primary-dark)] transition shadow-md flex items-center">
-                    <i data-lucide="home" class="w-4 h-4 mr-1"></i>
-                    Back to Home
-                </a>
-                
-                <button id="exportBtn" onclick="exportJiraTicketsToCSV()" 
-                        class="px-3 py-1.5 text-sm font-semibold rounded-lg transition shadow-md flex items-center">
-                    <i data-lucide="download" class="w-4 h-4 mr-1"></i>
-                    Export CSV
-                </button>
-            </nav>
-        </div>
-    </header>
+        <button id="exportCsvBtn" class="px-3 py-1.5 text-sm font-semibold rounded-lg shadow-md flex items-center">
+          <i data-lucide="download" class="w-4 h-4 mr-1"></i> Export CSV
+        </button>
 
-    <main class="container">
-        
-        <section class="bg-white p-6 rounded-xl shadow-lg mb-8 border-t-4 border-green-600">
-            <h2 class="text-xl font-bold mb-4 text-gray-700">Add New Ticket</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <div>
-                    <label for="jiraTicketId" class="block text-sm font-medium text-gray-700 mb-1">JIRA Ticket ID</label>
-                    <input type="text" id="jiraTicketId" placeholder="e.g., JIRA-1234" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-                </div>
-                <div class="md:col-span-2">
-                    <label for="jiraSubject" class="block text-sm font-medium text-gray-700 mb-1">Subject / Description</label>
-                    <input type="text" id="jiraSubject" placeholder="Brief summary of the change" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-                </div>
-                <div>
-                    <button onclick="addNewTicket()" class="w-full px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-md">
-                        Add Ticket
-                    </button>
-                </div>
-            </div>
-        </section>
+        <button id="exportPngBtn" class="px-3 py-1.5 text-sm font-semibold rounded-lg shadow-md flex items-center">
+          <i data-lucide="image" class="w-4 h-4 mr-1"></i> Export PNG
+        </button>
 
-        <section class="bg-white p-6 rounded-xl shadow-lg">
-            <h2 class="text-2xl font-bold mb-4 text-gray-700">Deployment Tickets List</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">JIRA ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tester</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="jiraTicketTableBody" class="bg-white divide-y divide-gray-200">
-                        </tbody>
-                </table>
-            </div>
-            <p id="noTicketsMessage" class="text-center py-8 text-gray-500 hidden">No tickets found. Add a new ticket above.</p>
-        </section>
+        <button id="saveBtn" class="px-3 py-1.5 text-sm font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 shadow-md flex items-center">
+          <i data-lucide="save" class="w-4 h-4 mr-1"></i> Save
+        </button>
 
-    </main>
-
-    <div id="editModalBackdrop" class="edit-modal-backdrop" onclick="if(event.target.id === 'editModalBackdrop') closeEditModal()">
-        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg">
-            <h3 class="text-xl font-bold mb-4">Edit Ticket Details</h3>
-            <div class="space-y-4">
-                <input type="hidden" id="originalJiraId">
-                <div>
-                    <label for="editJiraId" class="block text-sm font-medium text-gray-700 mb-1">New JIRA Ticket ID</label>
-                    <input type="text" id="editJiraId" class="w-full p-2 border border-gray-300 rounded-lg">
-                </div>
-                <div>
-                    <label for="editSubject" class="block text-sm font-medium text-gray-700 mb-1">New Subject / Description</label>
-                    <input type="text" id="editSubject" class="w-full p-2 border border-gray-300 rounded-lg">
-                </div>
-                <div class="flex justify-end space-x-3 pt-2">
-                    <button onclick="closeEditModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">Cancel</button>
-                    <button onclick="saveEditDetails()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
-                </div>
-            </div>
-        </div>
+        <button id="resetBtn" class="px-3 py-1.5 text-sm font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-md flex items-center">
+          <i data-lucide="trash" class="w-4 h-4 mr-1"></i> Reset
+        </button>
+      </nav>
     </div>
+  </header>
 
+  <main id="mainContent" class="container space-y-8">
+    <!-- KPI CARDS -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white p-4 rounded-xl shadow-lg border-t-4 border-yellow-400">
+        <h3 class="text-sm font-semibold text-gray-600">Pending Tickets</h3>
+        <p id="pendingCount" class="text-3xl font-bold text-yellow-600">0</p>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow-lg border-t-4 border-green-500">
+        <h3 class="text-sm font-semibold text-gray-600">Retesting Done</h3>
+        <p id="doneCount" class="text-3xl font-bold text-green-600">0</p>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow-lg border-t-4 border-indigo-500">
+        <h3 class="text-sm font-semibold text-gray-600">Total Tickets</h3>
+        <p id="totalCount" class="text-3xl font-bold text-indigo-600">0</p>
+      </div>
+    </section>
 
-<script>
-    // =======================================================
-    // JIRA TICKET LOGIC (SELF-CONTAINED)
-    // =======================================================
-    const DEPLOYMENT_KEY = 'testingDataRegressionDeploymentTickets';
-    const TESTER_NAMES = ['Unassigned', 'IMRAN', 'JOHN', 'NARESH','SALIQ','YUSUF', 'Deployment Team'];
-    
-    // --- Core Data Functions ---
-    
-    /** Initializes default data if none exists */
-    function initializeJiraData() {
-        if (!localStorage.getItem(DEPLOYMENT_KEY)) {
-            const defaultTickets = [
-                { id: 'JIRA-1001', subject: 'Fix: Database connection timeout issue on reports page.', tester: 'Tester A', status: 'Pending', timestamp: 'N/A' },
-                { id: 'JIRA-1002', subject: 'New Feature: Add bulk email notification capability.', tester: 'Tester B', status: 'Retesting Done', timestamp: '2025-11-02 23:45:00' }
-            ];
-            localStorage.setItem(DEPLOYMENT_KEY, JSON.stringify(defaultTickets));
-        }
-    }
+    <!-- Add Ticket -->
+    <section class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-600">
+      <h2 class="text-xl font-bold mb-4 text-gray-700">Add New Ticket</h2>
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+        <div class="md:col-span-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">JIRA Ticket ID</label>
+          <input id="jiraTicketId" type="text" placeholder="e.g., JIRA-1234" class="w-full p-2 border rounded-lg">
+        </div>
 
-    /** Fetches data from localStorage */
-    function fetchJiraData() {
-        const data = localStorage.getItem(DEPLOYMENT_KEY);
-        return data ? JSON.parse(data) : [];
-    }
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Subject / Description</label>
+          <input id="jiraSubject" type="text" placeholder="Brief summary" class="w-full p-2 border rounded-lg">
+        </div>
 
-    /** Saves data back to localStorage */
-    function saveJiraData(data) {
-        localStorage.setItem(DEPLOYMENT_KEY, JSON.stringify(data));
-    }
+        <div class="md:col-span-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Assign Tester</label>
+          <select id="jiraTesterSelect" class="w-full p-2 border rounded-lg"></select>
+        </div>
 
-    // --- CRUD Operations ---
-    
-    /** 1. Creates a new ticket */
-    function addNewTicket() {
-        const idInput = document.getElementById('jiraTicketId');
-        const subjectInput = document.getElementById('jiraSubject');
-        let data = fetchJiraData(); 
+        <div class="md:col-span-1">
+          <button id="addTicketBtn" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg">Add Ticket</button>
+        </div>
+      </div>
+    </section>
 
-        const id = idInput.value.trim().toUpperCase();
-        const subject = subjectInput.value.trim();
+    <!-- Ticket Table -->
+    <section class="bg-white p-6 rounded-xl shadow-lg">
+      <h2 class="text-2xl font-bold mb-4 text-gray-700">Deployment Tickets List</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">JIRA ID</th>
+              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Subject</th>
+              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Tester</th>
+              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Status</th>
+              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Timestamp</th>
+              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="jiraTicketTableBody" class="divide-y divide-gray-200"></tbody>
+        </table>
+      </div>
+      <p id="noTicketsMessage" class="text-center py-8 text-gray-500 hidden">No tickets found. Add a new ticket above.</p>
+    </section>
 
-        if (!id || !subject) {
-            alert("JIRA Ticket ID and Subject are required.");
-            return;
-        }
-        if (data.some(ticket => ticket.id === id)) {
-            alert(`JIRA Ticket ID ${id} already exists.`);
-            return;
-        }
+    <!-- Chart Section (bottom) -->
+    <section class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-indigo-600">
+      <h2 class="text-lg font-bold mb-4 text-gray-700">Tickets by Tester & Status</h2>
+      <div style="position:relative; height:320px;">
+        <canvas id="testerChart"></canvas>
+      </div>
+    </section>
+  </main>
 
-        const newTicket = {
-            id: id,
-            subject: subject,
-            tester: 'Unassigned',
-            status: 'Pending',
-            timestamp: 'N/A'
-        };
+  <script>
+  // --------------------------
+  // Constants & helpers
+  // --------------------------
+  const DEPLOYMENT_KEY = 'testingDataRegressionDeploymentTickets';
+  const TESTER_NAMES = ['Unassigned', 'IMRAN', 'JOHN', 'NARESH', 'SALIQ', 'YUSUF', 'Deployment Team'];
+  const STATUS_LIST = ['Pending', 'Retesting Done'];
 
-        data.push(newTicket);
-        saveJiraData(data);
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function nowFormatted(){ const d = new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
 
-        idInput.value = '';
-        subjectInput.value = '';
+  // --------------------------
+  // State
+  // --------------------------
+  let tickets = [];
+  let testerChartInstance = null;
+
+  // --------------------------
+  // Persistence
+  // --------------------------
+  function loadFromStorage(){
+    const raw = localStorage.getItem(DEPLOYMENT_KEY);
+    if(raw){
+      try { tickets = JSON.parse(raw); }
+      catch(e){ tickets = []; }
+    } else {
+      tickets = [
+        { id: 'JIRA-1001', subject: 'Fix DB timeout issue', tester: 'IMRAN', status: 'Pending', timestamp: 'N/A' },
         
-        renderJiraTicketTable();
+      ];
+      saveToStorage();
     }
+  }
+  function saveToStorage(){
+    localStorage.setItem(DEPLOYMENT_KEY, JSON.stringify(tickets));
+    // flash Save button
+    const btn = document.getElementById('saveBtn');
+    if(btn){ const orig = btn.innerHTML; btn.innerHTML = 'Saved'; setTimeout(()=> btn.innerHTML = orig, 700); }
+  }
 
-    /** 2. Deletes a ticket */
-    function deleteJiraTicket(ticketId) {
-        if (!confirm(`Are you sure you want to delete JIRA Ticket: ${ticketId}?`)) return;
-        
-        let data = fetchJiraData();
-        const initialLength = data.length;
-        data = data.filter(item => item.id !== ticketId);
-
-        if (data.length < initialLength) {
-            saveJiraData(data);
-            alert(`JIRA Ticket ID: ${ticketId} deleted successfully.`);
-            renderJiraTicketTable(); 
-        } else {
-            alert(`Error: JIRA Ticket ID: ${ticketId} not found.`);
-        }
-    }
-
-    /** 3. Updates status and tester dropdowns */
-    function updateRowDetails(selectElement, ticketId, field) {
-        let data = fetchJiraData(); 
-        let ticketIndex = data.findIndex(t => t.id === ticketId);
-        if (ticketIndex === -1) return;
-        
-        let ticketToUpdate = data[ticketIndex];
-        let newStatus = ticketToUpdate.status;
-        let newTester = ticketToUpdate.tester;
-        
-        if (field === 'status') {
-            newStatus = selectElement.value;
-        } else if (field === 'tester') {
-            newTester = selectElement.value;
-        }
-
-        // Handle timestamp logic
-        if (ticketToUpdate.status !== newStatus && newStatus !== 'Pending') {
-             const now = new Date();
-             const datePart = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-             const timePart = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
-             ticketToUpdate.timestamp = `${datePart} ${timePart}`;
-        } else if (newStatus === 'Pending') {
-            ticketToUpdate.timestamp = 'N/A';
-        }
-        
-        ticketToUpdate.status = newStatus;
-        ticketToUpdate.tester = newTester;
-        data[ticketIndex] = ticketToUpdate;
-
-        saveJiraData(data);
-        renderJiraTicketTable();
-    }
-    
-    /** 4. Saves full ticket details (from modal) */
-    function saveEditDetails() {
-        const oldId = document.getElementById('originalJiraId').value;
-        const newId = document.getElementById('editJiraId').value.trim().toUpperCase();
-        const newSubject = document.getElementById('editSubject').value.trim();
-
-        if (!newId || !newSubject) {
-            alert("JIRA Ticket ID and Subject are required.");
-            return;
-        }
-        
-        let data = fetchJiraData();
-        let ticketIndex = data.findIndex(t => t.id === oldId);
-
-        if (ticketIndex !== -1) {
-            
-            // Check for new ID conflicts if ID was changed
-            if (oldId !== newId) {
-                if (data.some(item => item.id === newId)) {
-                    alert(`Error: New JIRA ID ${newId} already exists.`);
-                    return;
-                }
-            }
-            
-            let originalTicket = data[ticketIndex];
-
-            // Update the existing ticket object
-            originalTicket.id = newId;
-            originalTicket.subject = newSubject;
-            
-            saveJiraData(data);
-            renderJiraTicketTable();
-            closeEditModal();
-            alert(`JIRA Ticket ${oldId} updated to ${newId} successfully.`);
-        } else {
-            alert(`Error: Original JIRA Ticket ID ${oldId} not found.`);
-        }
-    }
-
-
-    // --- UI/Rendering Functions ---
-
-    /** Renders the main ticket table */
-    function renderJiraTicketTable() {
-        const tableBody = document.getElementById('jiraTicketTableBody');
-        const noTicketsMessage = document.getElementById('noTicketsMessage');
-        const data = fetchJiraData(); 
-        
-        tableBody.innerHTML = '';
-
-        if (data.length === 0) {
-            noTicketsMessage.classList.remove('hidden');
-            return;
-        }
-        noTicketsMessage.classList.add('hidden');
-
-        data.forEach(ticket => {
-            const row = document.createElement('tr');
-            // Class name based on status (e.g., 'Retesting-Done-row')
-            row.className = `${ticket.status.replace(/\s/g, '-')}-row hover:bg-gray-100`;
-
-            // Dropdown for Tester Names
-            const testerSelectOptions = TESTER_NAMES.map(name => 
-                `<option value="${name}" ${ticket.tester === name ? 'selected' : ''}>${name}</option>`
-            ).join('');
-
-            // Dropdown for Status
-            const statusSelectOptions = [
-                { value: 'Pending', text: 'Pending' },
-                { value: 'Retesting Done', text: 'Retesting Done' }
-            ].map(s => 
-                `<option value="${s.value}" ${ticket.status === s.value ? 'selected' : ''}>${s.text}</option>`
-            ).join('');
-
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${ticket.id}</td>
-                <td class="px-6 py-4 whitespace-normal text-sm text-gray-500">${ticket.subject}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <select onchange="updateRowDetails(this, '${ticket.id}', 'tester')" class="p-1 border border-gray-300 rounded text-sm bg-white">
-                        ${testerSelectOptions}
-                    </select>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <select onchange="updateRowDetails(this, '${ticket.id}', 'status')" class="p-1 border border-gray-300 rounded text-sm bg-white">
-                        ${statusSelectOptions}
-                    </select>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">${ticket.timestamp}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button onclick="openEditModal('${ticket.id}')" class="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
-                    <button onclick="deleteJiraTicket('${ticket.id}')" class="text-red-600 hover:text-red-800">Delete</button>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-    }
-
-    // --- Modal Logic ---
-    function openEditModal(ticketId) {
-        const data = fetchJiraData(); 
-        const ticketToEdit = data.find(t => t.id === ticketId);
-        
-        if (ticketToEdit) {
-            document.getElementById('originalJiraId').value = ticketToEdit.id;
-            document.getElementById('editJiraId').value = ticketToEdit.id;
-            document.getElementById('editSubject').value = ticketToEdit.subject;
-            document.getElementById('editModalBackdrop').style.display = 'flex';
-        } else {
-            alert("Ticket not found.");
-        }
-    }
-
-    function closeEditModal() {
-        document.getElementById('editModalBackdrop').style.display = 'none';
-    }
-
-    // --- Export Function (CSV) ---
-    function exportJiraTicketsToCSV() {
-        const data = fetchJiraData();
-        if (data.length === 0) {
-            alert("No tickets to export.");
-            return;
-        }
-
-        const headers = ["JIRA ID", "Subject", "Tester", "Status", "Timestamp"];
-        const csvRows = [headers.join(',')];
-
-        const cleanAndQuote = (text) => {
-            let cleaned = (text || '').toString().replace(/[\r\n]+/g, ' ').trim();
-            cleaned = cleaned.replace(/"/g, '""');
-            return `"${cleaned}"`;
-        };
-        
-        for (const item of data) {
-            const row = [
-                cleanAndQuote(item.id),
-                cleanAndQuote(item.subject),
-                cleanAndQuote(item.tester),
-                cleanAndQuote(item.status),
-                cleanAndQuote(item.timestamp || 'N/A')
-            ];
-            csvRows.push(row.join(','));
-        }
-
-        const csvContent = csvRows.join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-
-        link.setAttribute("href", url);
-        link.setAttribute("download", `deployment_tickets_export_${new Date().toISOString().slice(0, 10)}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        alert("Deployment tickets exported to CSV successfully!");
-    }
-
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // 1. Initialize data store
-        initializeJiraData(); 
-        
-        // 2. Render UI
-        renderJiraTicketTable();
+  // --------------------------
+  // Render helpers
+  // --------------------------
+  function populateTesterSelect(){
+    const sel = document.getElementById('jiraTesterSelect');
+    sel.innerHTML = '';
+    TESTER_NAMES.forEach(n => {
+      const o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o);
     });
-</script>
+  }
 
+  function updateKPIs(){
+    document.getElementById('pendingCount').textContent = tickets.filter(t=>t.status==='Pending').length;
+    document.getElementById('doneCount').textContent = tickets.filter(t=>t.status==='Retesting Done').length;
+    document.getElementById('totalCount').textContent = tickets.length;
+  }
+
+  function renderTable(){
+    const tbody = document.getElementById('jiraTicketTableBody');
+    tbody.innerHTML = '';
+    if(tickets.length === 0){
+      document.getElementById('noTicketsMessage').classList.remove('hidden');
+      updateKPIs();
+      renderChart();
+      return;
+    }
+    document.getElementById('noTicketsMessage').classList.add('hidden');
+
+    tickets.forEach(ticket => {
+      const tr = document.createElement('tr');
+      // apply row class based on status (matches CSS)
+      const cls = ticket.status.replace(/\s/g, '-') + '-row';
+      tr.className = cls;
+
+      tr.innerHTML = `
+        <td class="px-4 py-2 font-semibold">${escapeHtml(ticket.id)}</td>
+        <td class="px-4 py-2">${escapeHtml(ticket.subject)}</td>
+        <td class="px-4 py-2">
+          <select class="border rounded px-2 py-1 text-sm tester-select">
+            ${TESTER_NAMES.map(n => `<option value="${n}" ${n===ticket.tester ? 'selected' : ''}>${n}</option>`).join('')}
+          </select>
+        </td>
+        <td class="px-4 py-2">
+          <select class="border rounded px-2 py-1 text-sm status-select">
+            ${STATUS_LIST.map(s => `<option value="${s}" ${s===ticket.status ? 'selected' : ''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td class="px-4 py-2 text-xs text-gray-600">${escapeHtml(ticket.timestamp)}</td>
+        <td class="px-4 py-2 text-sm text-red-600 cursor-pointer delete-btn">Delete</td>
+      `;
+
+      // attach events
+      tr.querySelector('.status-select').addEventListener('change', (e) => {
+        const newStatus = e.target.value;
+        // if changed to Pending -> set N/A, else set now
+        if(newStatus === 'Pending') ticket.timestamp = 'N/A';
+        else if(ticket.status === 'Pending' && newStatus !== 'Pending') ticket.timestamp = nowFormatted();
+        else ticket.timestamp = nowFormatted();
+        ticket.status = newStatus;
+        saveToStorage();
+        renderAll(); // re-render to apply row color reliably
+      });
+
+      tr.querySelector('.tester-select').addEventListener('change', (e) => {
+        ticket.tester = e.target.value;
+        saveToStorage();
+        renderAll(); // re-render chart/kpi
+      });
+
+      tr.querySelector('.delete-btn').addEventListener('click', () => {
+        if(!confirm(`Delete ${ticket.id}?`)) return;
+        tickets = tickets.filter(t => t.id !== ticket.id);
+        saveToStorage();
+        renderAll();
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    updateKPIs();
+    renderChart(); // chart bottom will update
+  }
+
+  function renderChart(){
+    const labels = TESTER_NAMES.slice();
+    const countsPending = labels.map(() => 0);
+    const countsDone = labels.map(() => 0);
+
+    tickets.forEach(t => {
+      const idx = labels.indexOf(t.tester) >= 0 ? labels.indexOf(t.tester) : labels.indexOf('Unassigned');
+      if(t.status === 'Retesting Done') countsDone[idx] += 1;
+      else countsPending[idx] += 1;
+    });
+
+    const ctx = document.getElementById('testerChart').getContext('2d');
+    if(testerChartInstance) testerChartInstance.destroy();
+
+    testerChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Pending', data: countsPending, backgroundColor: 'rgba(250,204,21,0.9)' },
+          { label: 'Retesting Done', data: countsDone, backgroundColor: 'rgba(16,185,129,0.9)' }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision:0 } } }
+      }
+    });
+  }
+
+  // small helper
+  function escapeHtml(str){ if(str == null) return ''; return String(str).replace(/[&<>"'`=\/]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'})[s]); }
+
+  // --------------------------
+  // Actions: Add, Export, Save, Reset
+  // --------------------------
+  function addNewTicket(){
+    const idEl = document.getElementById('jiraTicketId');
+    const subjectEl = document.getElementById('jiraSubject');
+    const testerEl = document.getElementById('jiraTesterSelect');
+
+    const id = idEl.value.trim().toUpperCase();
+    const subject = subjectEl.value.trim();
+    const tester = testerEl.value;
+
+    if(!id || !subject) return alert('JIRA Ticket ID and Subject are required.');
+    if(tickets.some(t => t.id === id)) return alert(`JIRA Ticket ID ${id} already exists.`);
+    const newTicket = { id, subject, tester: tester || 'Unassigned', status: 'Pending', timestamp: 'N/A' };
+    tickets.unshift(newTicket);
+    saveToStorage();
+    idEl.value = '';
+    subjectEl.value = '';
+    renderAll();
+  }
+
+  function exportJiraTicketsToCSV(){
+    if(tickets.length === 0) return alert('No tickets to export.');
+    const headers = ['JIRA ID','Subject','Tester','Status','Timestamp'];
+    const rows = tickets.map(t => [t.id, t.subject, t.tester, t.status, t.timestamp].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+    const csv = [headers.join(',')].concat(rows).join('\n');
+    const blob = new Blob([csv], { type:'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `deployment_tickets_${(new Date()).toISOString().slice(0,10)}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportFullPageAsPng(){
+    const el = document.querySelector('#mainContent');
+    // ensure chart finished rendering
+    setTimeout(()=>{
+      html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
+        scrollX: 0,
+        scrollY: 0
+      }).then(canvas=>{
+        canvas.toBlob(blob=>{
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = `deployment_tickets_${(new Date()).toISOString().slice(0,10)}.png`; a.click();
+          URL.revokeObjectURL(url);
+        }, 'image/png');
+      }).catch(err => { console.error(err); alert('Export failed: ' + (err && err.message ? err.message : 'unknown')); });
+    }, 250);
+  }
+
+  function saveDashboard(){
+    saveToStorage();
+  }
+
+  function clearAllTickets(){
+    if(!confirm('Clear all tickets?')) return;
+    localStorage.removeItem(DEPLOYMENT_KEY);
+    loadFromStorage();
+    renderAll();
+  }
+
+  // --------------------------
+  // Boot
+  // --------------------------
+  function renderAll(){
+    populateTesterSelect();
+    renderTable();
+    updateKPIs();
+    renderChart();
+    lucide.createIcons();
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    loadFromStorage();
+    // wire buttons
+    document.getElementById('addTicketBtn').addEventListener('click', addNewTicket);
+    document.getElementById('exportCsvBtn').addEventListener('click', exportJiraTicketsToCSV);
+    document.getElementById('exportPngBtn').addEventListener('click', exportFullPageAsPng);
+    document.getElementById('saveBtn').addEventListener('click', saveDashboard);
+    document.getElementById('resetBtn').addEventListener('click', clearAllTickets);
+
+    renderAll();
+  });
+  </script>
 </body>
 </html>
