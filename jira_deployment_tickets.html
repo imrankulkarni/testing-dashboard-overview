@@ -53,6 +53,10 @@
         <button id="resetBtn" class="px-3 py-1.5 text-sm font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-md flex items-center">
           <i data-lucide="trash" class="w-4 h-4 mr-1"></i> Reset
         </button>
+		
+		<button id="deleteSelectedBtn" disabled class="px-3 py-1.5 text-sm font-semibold bg-gray-400 text-white rounded-lg shadow-md flex items-center cursor-not-allowed">
+  <i data-lucide="x-circle" class="w-4 h-4 mr-1"></i> Delete Selected
+</button>
       </nav>
     </div>
   </header>
@@ -104,16 +108,19 @@
       <h2 class="text-2xl font-bold mb-4 text-gray-700">Deployment Tickets List</h2>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 text-sm">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">JIRA ID</th>
-              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Subject</th>
-              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Tester</th>
-              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Status</th>
-              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Timestamp</th>
-              <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
+         <thead class="bg-gray-50">
+  <tr>
+    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase w-10">
+      <i data-lucide="check-square" class="w-4 h-4 text-gray-400"></i>
+    </th>
+    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">JIRA ID</th>
+    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Subject</th>
+    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Tester</th>
+    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Status</th>
+    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Timestamp</th>
+    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase">Actions</th>
+  </tr>
+</thead>
           <tbody id="jiraTicketTableBody" class="divide-y divide-gray-200"></tbody>
         </table>
       </div>
@@ -133,246 +140,313 @@
   // --------------------------
   // Constants & helpers
   // --------------------------
-  const DEPLOYMENT_KEY = 'testingDataRegressionDeploymentTickets';
-  const TESTER_NAMES = ['Unassigned', 'IMRAN', 'JOHN', 'NARESH', 'SALIQ', 'YUSUF', 'Deployment Team'];
-  const STATUS_LIST = ['Pending', 'Retesting Done'];
-
-  function pad(n){ return String(n).padStart(2,'0'); }
-  function nowFormatted(){ const d = new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
-
   // --------------------------
-  // State
-  // --------------------------
-  let tickets = [];
-  let testerChartInstance = null;
+// UPDATED JAVASCRIPT CODE
+// Replace the entire <script> block in your HTML with this code.
+// --------------------------
+const DEPLOYMENT_KEY = 'testingDataRegressionDeploymentTickets';
+const TESTER_NAMES = ['Unassigned', 'IMRAN', 'JOHN', 'NARESH', 'SALIQ', 'YUSUF', 'Deployment Team'];
+const STATUS_LIST = ['Pending', 'Retesting Done'];
 
-  // --------------------------
-  // Persistence
-  // --------------------------
-  function loadFromStorage(){
-    const raw = localStorage.getItem(DEPLOYMENT_KEY);
-    if(raw){
-      try { tickets = JSON.parse(raw); }
-      catch(e){ tickets = []; }
-    } else {
-      tickets = [
-        { id: 'JIRA-1001', subject: 'Fix DB timeout issue', tester: 'IMRAN', status: 'Pending', timestamp: 'N/A' },
-      ];
-      saveToStorage();
-    }
-  }
-  function saveToStorage(){
-    localStorage.setItem(DEPLOYMENT_KEY, JSON.stringify(tickets));
-    // flash Save button
-    const btn = document.getElementById('saveBtn');
-    if(btn){ const orig = btn.innerHTML; btn.innerHTML = 'Saved'; setTimeout(()=> btn.innerHTML = orig, 700); }
-  }
+function pad(n){ return String(n).padStart(2,'0'); }
+function nowFormatted(){ const d = new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
 
-  // --------------------------
-  // Render helpers
-  // --------------------------
-  function populateTesterSelect(){
-    const sel = document.getElementById('jiraTesterSelect');
-    sel.innerHTML = '';
-    TESTER_NAMES.forEach(n => {
-      const o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o);
-    });
-  }
+// --------------------------
+// State
+// --------------------------
+let tickets = [];
+let testerChartInstance = null;
+// NEW: Track selected ticket IDs
+let selectedTicketIds = new Set(); 
 
-  function updateKPIs(){
-    document.getElementById('pendingCount').textContent = tickets.filter(t=>t.status==='Pending').length;
-    document.getElementById('doneCount').textContent = tickets.filter(t=>t.status==='Retesting Done').length;
-    document.getElementById('totalCount').textContent = tickets.length;
-  }
-
-  function renderTable(){
-    const tbody = document.getElementById('jiraTicketTableBody');
-    tbody.innerHTML = '';
-    if(tickets.length === 0){
-      document.getElementById('noTicketsMessage').classList.remove('hidden');
-      updateKPIs();
-      renderChart();
-      return;
-    }
-    document.getElementById('noTicketsMessage').classList.add('hidden');
-
-    tickets.forEach(ticket => {
-      const tr = document.createElement('tr');
-      // apply row class based on status (matches CSS)
-      const cls = ticket.status.replace(/\s/g, '-') + '-row';
-      tr.className = cls;
-
-      tr.innerHTML = `
-        <td class="px-4 py-2 font-semibold">${escapeHtml(ticket.id)}</td>
-        <td class="px-4 py-2">${escapeHtml(ticket.subject)}</td>
-        <td class="px-4 py-2">
-          <select class="border rounded px-2 py-1 text-sm tester-select">
-            ${TESTER_NAMES.map(n => `<option value="${n}" ${n===ticket.tester ? 'selected' : ''}>${n}</option>`).join('')}
-          </select>
-        </td>
-        <td class="px-4 py-2">
-          <select class="border rounded px-2 py-1 text-sm status-select">
-            ${STATUS_LIST.map(s => `<option value="${s}" ${s===ticket.status ? 'selected' : ''}>${s}</option>`).join('')}
-          </select>
-        </td>
-        <td class="px-4 py-2 text-xs text-gray-600">${escapeHtml(ticket.timestamp)}</td>
-        <td class="px-4 py-2 text-sm text-red-600 cursor-pointer delete-btn">Delete</td>
-      `;
-
-      // attach events
-      tr.querySelector('.status-select').addEventListener('change', (e) => {
-        const newStatus = e.target.value;
-        // if changed to Pending -> set N/A, else set now
-        if(newStatus === 'Pending') ticket.timestamp = 'N/A';
-        else if(ticket.status === 'Pending' && newStatus !== 'Pending') ticket.timestamp = nowFormatted();
-        else ticket.timestamp = nowFormatted();
-        ticket.status = newStatus;
-        saveToStorage();
-        renderAll(); // re-render to apply row color reliably
-      });
-
-      tr.querySelector('.tester-select').addEventListener('change', (e) => {
-        ticket.tester = e.target.value;
-        saveToStorage();
-        renderAll(); // re-render chart/kpi
-      });
-
-      tr.querySelector('.delete-btn').addEventListener('click', () => {
-        if(!confirm(`Delete ${ticket.id}?`)) return;
-        tickets = tickets.filter(t => t.id !== ticket.id);
-        saveToStorage();
-        renderAll();
-      });
-
-      tbody.appendChild(tr);
-    });
-
-    updateKPIs();
-    renderChart(); // chart bottom will update
-  }
-
-  function renderChart(){
-    const labels = TESTER_NAMES.slice();
-    const countsPending = labels.map(() => 0);
-    const countsDone = labels.map(() => 0);
-
-    tickets.forEach(t => {
-      const idx = labels.indexOf(t.tester) >= 0 ? labels.indexOf(t.tester) : labels.indexOf('Unassigned');
-      if(t.status === 'Retesting Done') countsDone[idx] += 1;
-      else countsPending[idx] += 1;
-    });
-
-    const ctx = document.getElementById('testerChart').getContext('2d');
-    if(testerChartInstance) testerChartInstance.destroy();
-
-    testerChartInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          { label: 'Pending', data: countsPending, backgroundColor: 'rgba(250,204,21,0.9)' },
-          { label: 'Retesting Done', data: countsDone, backgroundColor: 'rgba(16,185,129,0.9)' }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } },
-        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision:0 } } }
-      }
-    });
-  }
-
-  // small helper
-  function escapeHtml(str){ if(str == null) return ''; return String(str).replace(/[&<>"'`=\/]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'})[s]); }
-
-  // --------------------------
-  // Actions: Add, Export, Save, Reset
-  // --------------------------
-  function addNewTicket(){
-    const idEl = document.getElementById('jiraTicketId');
-    const subjectEl = document.getElementById('jiraSubject');
-    const testerEl = document.getElementById('jiraTesterSelect');
-
-    const id = idEl.value.trim().toUpperCase();
-    const subject = subjectEl.value.trim();
-    const tester = testerEl.value;
-
-    if(!id || !subject) return alert('JIRA Ticket ID and Subject are required.');
-    if(tickets.some(t => t.id === id)) return alert(`JIRA Ticket ID ${id} already exists.`);
-    const newTicket = { id, subject, tester: tester || 'Unassigned', status: 'Pending', timestamp: 'N/A' };
-    tickets.unshift(newTicket);
-    saveToStorage();
-    idEl.value = '';
-    subjectEl.value = '';
-    renderAll();
-  }
-
-  function exportJiraTicketsToCSV(){
-    if(tickets.length === 0) return alert('No tickets to export.');
-    const headers = ['JIRA ID','Subject','Tester','Status','Timestamp'];
-    const rows = tickets.map(t => [t.id, t.subject, t.tester, t.status, t.timestamp].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
-    const csv = [headers.join(',')].concat(rows).join('\n');
-    const blob = new Blob([csv], { type:'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `deployment_tickets_${(new Date()).toISOString().slice(0,10)}.csv`; a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function exportFullPageAsPng(){
-    const el = document.querySelector('#mainContent');
-    // ensure chart finished rendering
-    setTimeout(()=>{
-      html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        windowWidth: document.documentElement.scrollWidth,
-        windowHeight: document.documentElement.scrollHeight,
-        scrollX: 0,
-        scrollY: 0
-      }).then(canvas=>{
-        canvas.toBlob(blob=>{
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a'); a.href = url; a.download = `deployment_tickets_${(new Date()).toISOString().slice(0,10)}.png`; a.click();
-          URL.revokeObjectURL(url);
-        }, 'image/png');
-      }).catch(err => { console.error(err); alert('Export failed: ' + (err && err.message ? err.message : 'unknown')); });
-    }, 250);
-  }
-
-  function saveDashboard(){
+// --------------------------
+// Persistence
+// --------------------------
+function loadFromStorage(){
+  const raw = localStorage.getItem(DEPLOYMENT_KEY);
+  if(raw){
+    try { tickets = JSON.parse(raw); }
+    catch(e){ tickets = []; }
+  } else {
+    tickets = [
+      { id: 'JIRA-1001', subject: 'Fix DB timeout issue', tester: 'IMRAN', status: 'Pending', timestamp: 'N/A' },
+    ];
     saveToStorage();
   }
+}
+function saveToStorage(){
+  localStorage.setItem(DEPLOYMENT_KEY, JSON.stringify(tickets));
+  // flash Save button
+  const btn = document.getElementById('saveBtn');
+  if(btn){ const orig = btn.innerHTML; btn.innerHTML = 'Saved'; setTimeout(()=> btn.innerHTML = orig, 700); }
+}
 
-  function clearAllTickets(){
-    if(!confirm('Clear all tickets?')) return;
-    localStorage.removeItem(DEPLOYMENT_KEY);
-    loadFromStorage();
-    renderAll();
-  }
+// --------------------------
+// Render helpers
+// --------------------------
+function populateTesterSelect(){
+  const sel = document.getElementById('jiraTesterSelect');
+  sel.innerHTML = '';
+  TESTER_NAMES.forEach(n => {
+    const o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o);
+  });
+}
 
-  // --------------------------
-  // Boot
-  // --------------------------
-  function renderAll(){
-    populateTesterSelect();
-    renderTable();
+function updateKPIs(){
+  document.getElementById('pendingCount').textContent = tickets.filter(t=>t.status==='Pending').length;
+  document.getElementById('doneCount').textContent = tickets.filter(t=>t.status==='Retesting Done').length;
+  document.getElementById('totalCount').textContent = tickets.length;
+}
+
+function renderTable(){
+  const tbody = document.getElementById('jiraTicketTableBody');
+  tbody.innerHTML = '';
+  if(tickets.length === 0){
+    document.getElementById('noTicketsMessage').classList.remove('hidden');
     updateKPIs();
     renderChart();
-    lucide.createIcons();
+    // NEW: Hide batch delete button
+    document.getElementById('deleteSelectedBtn').classList.add('hidden'); 
+    return;
   }
+  document.getElementById('noTicketsMessage').classList.add('hidden');
 
-  document.addEventListener('DOMContentLoaded', ()=>{
-    loadFromStorage();
-    // wire buttons
-    document.getElementById('addTicketBtn').addEventListener('click', addNewTicket);
-    document.getElementById('exportCsvBtn').addEventListener('click', exportJiraTicketsToCSV);
-    document.getElementById('exportPngBtn').addEventListener('click', exportFullPageAsPng);
-    document.getElementById('saveBtn').addEventListener('click', saveDashboard);
-    document.getElementById('resetBtn').addEventListener('click', clearAllTickets);
+  // NEW: Ensure batch delete button is visible
+  document.getElementById('deleteSelectedBtn').classList.remove('hidden');
 
-    renderAll();
+  tickets.forEach(ticket => {
+    const tr = document.createElement('tr');
+    // apply row class based on status (matches CSS)
+    const cls = ticket.status.replace(/\s/g, '-') + '-row';
+    tr.className = cls;
+
+    // Check if the current ticket is selected
+    const isChecked = selectedTicketIds.has(ticket.id);
+
+    tr.innerHTML = `
+      <td class="px-4 py-2 w-10">
+        <input type="checkbox" class="h-4 w-4 text-red-600 border-gray-300 rounded ticket-checkbox" data-ticket-id="${escapeHtml(ticket.id)}" ${isChecked ? 'checked' : ''}>
+      </td>
+      <td class="px-4 py-2 font-semibold">${escapeHtml(ticket.id)}</td>
+      <td class="px-4 py-2">${escapeHtml(ticket.subject)}</td>
+      <td class="px-4 py-2">
+        <select class="border rounded px-2 py-1 text-sm tester-select">
+          ${TESTER_NAMES.map(n => `<option value="${n}" ${n===ticket.tester ? 'selected' : ''}>${n}</option>`).join('')}
+        </select>
+      </td>
+      <td class="px-4 py-2">
+        <select class="border rounded px-2 py-1 text-sm status-select">
+          ${STATUS_LIST.map(s => `<option value="${s}" ${s===ticket.status ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td class="px-4 py-2 text-xs text-gray-600">${escapeHtml(ticket.timestamp)}</td>
+      <td class="px-4 py-2 text-sm text-red-600 cursor-pointer delete-btn" data-ticket-id="${escapeHtml(ticket.id)}">Delete</td>
+    `;
+    
+    // NEW: Attach checkbox event listener
+    tr.querySelector('.ticket-checkbox').addEventListener('change', (e) => {
+      const id = e.target.getAttribute('data-ticket-id');
+      if (e.target.checked) {
+        selectedTicketIds.add(id);
+      } else {
+        selectedTicketIds.delete(id);
+      }
+      updateDeleteSelectedButtonState();
+    });
+
+    // attach events for other controls
+    tr.querySelector('.status-select').addEventListener('change', (e) => {
+      const newStatus = e.target.value;
+      if(newStatus === 'Pending') ticket.timestamp = 'N/A';
+      else if(ticket.status === 'Pending' && newStatus !== 'Pending') ticket.timestamp = nowFormatted();
+      else ticket.timestamp = nowFormatted();
+      ticket.status = newStatus;
+      saveToStorage();
+      renderAll();
+    });
+
+    tr.querySelector('.tester-select').addEventListener('change', (e) => {
+      ticket.tester = e.target.value;
+      saveToStorage();
+      renderAll();
+    });
+
+    // Modified for single delete (using data-ticket-id)
+    tr.querySelector('.delete-btn').addEventListener('click', (e) => {
+      const idToDelete = e.target.getAttribute('data-ticket-id');
+      if(!confirm(`Delete ${idToDelete}?`)) return;
+      tickets = tickets.filter(t => t.id !== idToDelete);
+      saveToStorage();
+      // Ensure it's removed from selected list too
+      selectedTicketIds.delete(idToDelete);
+      renderAll();
+    });
+
+    tbody.appendChild(tr);
   });
+
+  updateKPIs();
+  renderChart();
+  updateDeleteSelectedButtonState(); // Initial button state update
+}
+
+// NEW: Function to update the Delete Selected button appearance
+function updateDeleteSelectedButtonState() {
+    const btn = document.getElementById('deleteSelectedBtn');
+    if (selectedTicketIds.size > 0) {
+        btn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+        btn.classList.add('bg-red-600', 'hover:bg-red-700');
+        btn.textContent = `Delete Selected (${selectedTicketIds.size})`;
+        btn.disabled = false;
+    } else {
+        btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+        btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+        btn.textContent = `Delete Selected`;
+        btn.disabled = true;
+    }
+}
+
+// Existing renderChart function... (no change needed here)
+function renderChart(){
+  const labels = TESTER_NAMES.slice();
+  const countsPending = labels.map(() => 0);
+  const countsDone = labels.map(() => 0);
+
+  tickets.forEach(t => {
+    const idx = labels.indexOf(t.tester) >= 0 ? labels.indexOf(t.tester) : labels.indexOf('Unassigned');
+    if(t.status === 'Retesting Done') countsDone[idx] += 1;
+    else countsPending[idx] += 1;
+  });
+
+  const ctx = document.getElementById('testerChart').getContext('2d');
+  if(testerChartInstance) testerChartInstance.destroy();
+
+  testerChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Pending', data: countsPending, backgroundColor: 'rgba(250,204,21,0.9)' },
+        { label: 'Retesting Done', data: countsDone, backgroundColor: 'rgba(16,185,129,0.9)' }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } },
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision:0 } } }
+    }
+  });
+}
+
+// small helper
+function escapeHtml(str){ if(str == null) return ''; return String(str).replace(/[&<>"'`=\/]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x3D;'})[s]); }
+
+// --------------------------
+// Actions: Add, Export, Save, Reset, Delete Selected
+// --------------------------
+function addNewTicket(){
+  const idEl = document.getElementById('jiraTicketId');
+  const subjectEl = document.getElementById('jiraSubject');
+  const testerEl = document.getElementById('jiraTesterSelect');
+
+  const id = idEl.value.trim().toUpperCase();
+  const subject = subjectEl.value.trim();
+  const tester = testerEl.value;
+
+  if(!id || !subject) return alert('JIRA Ticket ID and Subject are required.');
+  if(tickets.some(t => t.id === id)) return alert(`JIRA Ticket ID ${id} already exists.`);
+  const newTicket = { id, subject, tester: tester || 'Unassigned', status: 'Pending', timestamp: 'N/A' };
+  tickets.unshift(newTicket);
+  saveToStorage();
+  idEl.value = '';
+  subjectEl.value = '';
+  renderAll();
+}
+
+// Existing exportJiraTicketsToCSV function...
+function exportJiraTicketsToCSV(){
+  if(tickets.length === 0) return alert('No tickets to export.');
+  const headers = ['JIRA ID','Subject','Tester','Status','Timestamp'];
+  const rows = tickets.map(t => [t.id, t.subject, t.tester, t.status, t.timestamp].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(',')].concat(rows).join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `deployment_tickets_${(new Date()).toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Existing exportFullPageAsPng function...
+function exportFullPageAsPng(){
+  const el = document.querySelector('#mainContent');
+  // ensure chart finished rendering
+  setTimeout(()=>{
+    html2canvas(el, {
+      scale: 2,
+      useCORS: true,
+      windowWidth: document.documentElement.scrollWidth,
+      windowHeight: document.documentElement.scrollHeight,
+      scrollX: 0,
+      scrollY: 0
+    }).then(canvas=>{
+      canvas.toBlob(blob=>{
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `deployment_tickets_${(new Date()).toISOString().slice(0,10)}.png`; a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    }).catch(err => { console.error(err); alert('Export failed: ' + (err && err.message ? err.message : 'unknown')); });
+  }, 250);
+}
+
+function saveDashboard(){
+  saveToStorage();
+}
+
+function clearAllTickets(){
+  if(!confirm('Clear all tickets?')) return;
+  localStorage.removeItem(DEPLOYMENT_KEY);
+  loadFromStorage();
+  // Clear selected tickets too
+  selectedTicketIds.clear(); 
+  renderAll();
+}
+
+// NEW: Function to delete all selected tickets
+function deleteSelectedTickets() {
+    if (selectedTicketIds.size === 0) return alert('No tickets selected.');
+    if (!confirm(`Are you sure you want to delete ${selectedTicketIds.size} selected ticket(s)?`)) return;
+
+    tickets = tickets.filter(t => !selectedTicketIds.has(t.id));
+    selectedTicketIds.clear(); // Clear the set after deletion
+    saveToStorage();
+    renderAll();
+}
+
+// --------------------------
+// Boot
+// --------------------------
+function renderAll(){
+  populateTesterSelect();
+  renderTable();
+  updateKPIs();
+  renderChart();
+  lucide.createIcons();
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadFromStorage();
+  // wire buttons
+  document.getElementById('addTicketBtn').addEventListener('click', addNewTicket);
+  document.getElementById('exportCsvBtn').addEventListener('click', exportJiraTicketsToCSV);
+  document.getElementById('exportPngBtn').addEventListener('click', exportFullPageAsPng);
+  document.getElementById('saveBtn').addEventListener('click', saveDashboard);
+  document.getElementById('resetBtn').addEventListener('click', clearAllTickets);
+  
+  // NEW: Wire the delete selected button
+  document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedTickets);
+
+  renderAll();
+});
   </script>
 </body>
 </html>
