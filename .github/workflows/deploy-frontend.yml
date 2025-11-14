@@ -1,0 +1,23 @@
+name: Deploy Frontend to GitHub Pages
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare public
+        run: |
+          mkdir -p public
+          rsync -av --exclude .git --exclude node_modules ./ public/
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: public
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/deploy-pages@v1
